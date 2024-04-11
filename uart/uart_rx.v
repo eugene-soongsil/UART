@@ -30,11 +30,9 @@ end
 
 always@(posedge i_clk or negedge i_reset)begin
     if(!i_reset)
-        o_data = 0;
+        o_data <= 0;
     else if(rx_state == stop)
-        o_data = r_data;
-    else
-        o_data = o_data;
+        o_data <= r_data;
 end
 
 always@(posedge i_clk or negedge i_reset)begin
@@ -70,3 +68,4 @@ end
 endmodule
 
 //led가 나오긴 하는데 유지가 안댐
+//i_rxd가 o_data로 넘어가지가 않네
