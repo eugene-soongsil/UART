@@ -11,10 +11,10 @@ parameter           idle = 0, start = 1, d0 = 2, d1 = 3, d2 = 4, d3 = 5, d4 = 6,
                     d5 = 7, d6 = 8, d7 = 9, stop = 10;
 reg [3:0]           tx_state, next_tx_state;
 reg                 r_txd;
+reg [3:0] clk_div_c;
+reg rs;
 
-
-
-tx_clk_div  tx_clk(.i_clk(i_clk), .i_reset(i_reset), .o_clk_out(i_clk_tx));
+wire clk_div;
 
 
 //state output
@@ -35,20 +35,32 @@ always@*begin
     endcase
 end
 
-//state logic
-always@(posedge i_clk_tx or negedge i_reset)begin
+always @(posedge i_clk or negedge i_reset)begin
+    if(!i_reset || rs)
+        clk_div_c <= 0;
+    else
+        clk_div_c <= clk_div_c + 1;
+end
+
+assign clk_div = clk_div_c == 4'b1111;
+
+//state logic 
+always@(posedge i_clk or negedge i_reset)begin
     if(!i_reset)
         tx_state <= idle;
-    else
+    else if(clk_div)
         tx_state <= next_tx_state;
 end
 
 always@(*)begin
     next_tx_state = tx_state;
+    rs = 0;
     case(tx_state)
         idle : begin
-            if(i_start == 1'b1)
+            if(i_start == 1'b1)begin
                 next_tx_state = start;
+                rs = 1;
+            end
             else
                 next_tx_state = idle;
         end

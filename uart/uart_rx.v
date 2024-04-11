@@ -1,7 +1,8 @@
 module uart_rx(
-    input           i_clk_rx,
-    input           i_reset,
-    input           i_rxd,
+    input               i_clk,
+    input               i_clk_rx,
+    input               i_reset,
+    input               i_rxd,
     output  reg  [7:0]   o_data
 );
 
@@ -27,17 +28,19 @@ always@*begin
     endcase
 end
 
-always@(*)begin
-    if(rx_state == stop)
+always@(posedge i_clk or negedge i_reset)begin
+    if(!i_reset)
+        o_data = 0;
+    else if(rx_state == stop)
         o_data = r_data;
     else
-        o_data = 0;
+        o_data = o_data;
 end
 
-always@(posedge i_clk_rx or negedge i_reset)begin
+always@(posedge i_clk or negedge i_reset)begin
     if(!i_reset)
         rx_state <= idle;
-    else
+    else if(i_clk_rx)
         rx_state <= next_rx_state;
 end
 
@@ -65,3 +68,5 @@ always@(*)begin
 end
 
 endmodule
+
+//led가 나오긴 하는데 유지가 안댐
