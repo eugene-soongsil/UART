@@ -24,7 +24,7 @@ reg     [3:0]       tx_state, next_tx_state;
 always@(posedge clk or negedge reset)begin
     if(~reset)
         tx_state <= IDLE;
-    else if(clk)
+    else if(i_clk_tx)
         tx_state <= next_tx_state;
 end
 

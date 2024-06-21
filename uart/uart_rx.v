@@ -24,7 +24,7 @@ reg     [7:0]       r_data;
 always@(posedge clk or negedge reset)begin
     if(~reset)
         rx_state <= IDLE;
-    else if(clk)
+    else if(i_clk_rx)
         rx_state <= next_rx_state;
 end
 
