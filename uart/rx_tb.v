@@ -1,31 +1,33 @@
-`timescale 1ns/1ps
-module rx_tb();
+module RX_tb();
 
-reg         i_clk, i_reset, i_rxd;
-wire [7:0]  o_data;
+reg             clk, reset, i_rxd;
+wire  [7:0]     o_rx_data;
 
-
-rx_top_for_test inst_rx(
-    .i_clk(i_clk),
-    .i_reset(i_reset),
+UART_RX_TOP     RX(
+    .clk(clk),
+    .reset(reset),
     .i_rxd(i_rxd),
-    .o_data(o_data)
+    .o_rx_data(o_rx_data)
 );
 
-
 initial begin
-    i_clk = 0; i_reset = 1; i_rxd = 1;
-    #10
-    i_reset = 0;
-    #10
-    i_reset = 1;
-    #1000000
+    clk = 0;
+    reset = 1;
     i_rxd = 0;
+    #10
+    reset = 0;
+    #10
+    reset = 1;
 end
 
 always begin
-    #30
-    i_clk = ~i_clk;
+    #380
+    i_rxd = ~i_rxd; 
+end
+
+always begin
+    #50
+    clk = ~clk;
 end
 
 endmodule

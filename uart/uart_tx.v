@@ -1,100 +1,90 @@
-module uart_tx(
-    input           i_clk,
-//    input           i_start,
-    input           i_reset,
+module UART_TX(
+    input           clk,
+    input           reset,
     input           i_clk_tx,
-    input   [7:0]   sw,
-    input           i_bo,
+    input           i_button_edge,
+    input   [7:0]   i_switch,
     output  reg     o_txd
 );
 
-parameter           idle = 0, start = 1, d0 = 2, d1 = 3, d2 = 4, d3 = 5, d4 = 6,
-                    d5 = 7, d6 = 8, d7 = 9, stop = 10;
-reg [3:0]           tx_state, next_tx_state;
-reg                 r_txd, buff_bo, edge_bo;
+parameter           IDLE    = 0,
+                    START   = 1,
+                    D0      = 2,
+                    D1      = 3,
+                    D2      = 4,
+                    D3      = 5,
+                    D4      = 6,
+                    D5      = 7,
+                    D6      = 8,
+                    D7      = 9,
+                    STOP    = 10;
+reg     [3:0]       tx_state, next_tx_state;
 
-
-
-//state output
-always@*begin
-    case(tx_state)
-    idle    : r_txd = 1;
-    start   : r_txd = 0;
-    d0      : r_txd = sw[0];
-    d1      : r_txd = sw[1];
-    d2      : r_txd = sw[2];
-    d3      : r_txd = sw[3];
-    d4      : r_txd = sw[4];
-    d5      : r_txd = sw[5];
-    d6      : r_txd = sw[6];
-    d7      : r_txd = sw[7];
-    stop    : r_txd = 1;
-    default : r_txd = 1;
-    endcase
-end
-/*
-always@(posedge i_clk or negedge i_reset)begin
-    if(!i_reset)
-        o_txd <= 0;
-    else if(edge_bo)
-        o_txd <= r_txd;
-    else
-        o_txd <= 0;
-end
-*/
-
-//button
-always@(posedge i_clk or negedge i_reset)begin
-    if(!i_reset)
-        buff_bo <= 0;
-    else
-        buff_bo <= i_bo;
-end
-
-always@(posedge i_clk or negedge i_reset)begin
-    if(!i_reset)
-        edge_bo <= 0;
-    else begin
-        if((buff_bo == 0) && (i_bo == 1))
-            edge_bo <= 1;
-        else
-            edge_bo <= 0;
-    end
-end
-
-//state logic 
-always@(posedge i_clk or negedge i_reset)begin
-    if(!i_reset)
-        tx_state <= idle;
-    else if(i_clk_tx)
+//state logic
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        tx_state <= IDLE;
+    else if(clk)
         tx_state <= next_tx_state;
 end
 
+//state output & nextstate logic
 always@(*)begin
+    o_txd = 1'b1;
     next_tx_state = tx_state;
-        case(tx_state)
-        idle : begin
-            if(edge_bo == 1'b1)
-                next_tx_state = start;
-            else
-                next_tx_state = idle;
+
+    case(tx_state)
+    IDLE    :   begin
+        if(i_button_edge)begin
+            o_txd = 1'b1;
+            next_tx_state = START;
         end
-        start : next_tx_state = d0;
-        d0    : next_tx_state = d1;
-        d1    : next_tx_state = d2;
-        d2    : next_tx_state = d3;
-        d3    : next_tx_state = d4;
-        d4    : next_tx_state = d5;
-        d5    : next_tx_state = d6;
-        d6    : next_tx_state = d7;
-        d7    : next_tx_state = stop;
-        stop  : next_tx_state = idle;
-        default : next_tx_state = idle;
+        else begin
+            o_txd = 1'b1;
+            next_tx_state = IDLE;
+        end
+    end
+    START   :   begin
+        o_txd = 1'b0;
+        next_tx_state = D0;
+    end
+    D0      :   begin
+        o_txd = i_switch[0];
+        next_tx_state = D1;
+    end
+    D1      :   begin
+        o_txd = i_switch[1];
+        next_tx_state = D2;
+    end
+    D2      :   begin
+        o_txd = i_switch[2];
+        next_tx_state = D3;
+    end
+    D3      :   begin
+        o_txd = i_switch[3];
+        next_tx_state = D4;
+    end
+    D4      :   begin
+        o_txd = i_switch[4];
+        next_tx_state = D5;
+    end
+    D5      :   begin
+        o_txd = i_switch[5];
+        next_tx_state = D6;
+    end
+    D6      :   begin
+        o_txd = i_switch[6];
+        next_tx_state = D7;
+    end
+    D7      :   begin
+        o_txd = i_switch[7];
+        next_tx_state = STOP;
+    end
+    STOP    :   begin
+        o_txd = 1'b1;
+        next_tx_state = IDLE;
+    end
     endcase
 end
 
-assign o_txd = r_txd;
-
 endmodule
-
-//i_bo 만들고 나서 동작이 안댐....i_start 사용할땐 됐는데

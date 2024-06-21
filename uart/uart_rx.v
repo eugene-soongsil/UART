@@ -1,71 +1,102 @@
-module uart_rx(
-    input               i_clk,
+module UART_RX(
+    input               clk,
+    input               reset,
     input               i_clk_rx,
-    input               i_reset,
     input               i_rxd,
-    output  reg  [7:0]   o_data
+    output reg [7:0]    o_rx_data
 );
 
-parameter           idle = 0, start = 1, d0 = 2, d1 = 3, d2 = 4, d3 = 5, d4 = 6,
-                    d5 = 7, d6 = 8, d7 = 9, stop = 10;
+parameter           IDLE    = 0,
+                    START   = 1,
+                    D0      = 2,
+                    D1      = 3,
+                    D2      = 4,
+                    D3      = 5,
+                    D4      = 6,
+                    D5      = 7,
+                    D6      = 8,
+                    D7      = 9,
+                    STOP    = 10;
 reg     [3:0]       rx_state, next_rx_state;
 reg     [7:0]       r_data;
 
-always@*begin
-    case(rx_state)
-    idle    : r_data = 0;
-    start   : r_data = 0;
-    d0      : r_data[0] = i_rxd;
-    d1      : r_data[1] = i_rxd;
-    d2      : r_data[2] = i_rxd;
-    d3      : r_data[3] = i_rxd;
-    d4      : r_data[4] = i_rxd;
-    d5      : r_data[5] = i_rxd;
-    d6      : r_data[6] = i_rxd;
-    d7      : r_data[7] = i_rxd;
-    stop    : r_data = r_data;
-    default : r_data = 0;
-    endcase
-end
-
-always@(posedge i_clk or negedge i_reset)begin
-    if(!i_reset)
-        o_data <= 0;
-    else if(rx_state == stop)
-        o_data <= r_data;
-end
-
-always@(posedge i_clk or negedge i_reset)begin
-    if(!i_reset)
-        rx_state <= idle;
-    else if(i_clk_rx)
+//state logic
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        rx_state <= IDLE;
+    else if(clk)
         rx_state <= next_rx_state;
 end
 
+//state output & next state logic
 always@(*)begin
     next_rx_state = rx_state;
+
     case(rx_state)
-    idle    : begin
-        if(i_rxd == 1'b0)
-            next_rx_state = start;
-        else
-            next_rx_state = idle;
+    IDLE    :   begin
+        if(~i_rxd && reset)begin
+            next_rx_state = START;
+        end
+        else begin
+            next_rx_state = IDLE;
+        end
     end
-    start   : next_rx_state = d0;
-    d0      : next_rx_state = d1;
-    d1      : next_rx_state = d2;
-    d2      : next_rx_state = d3;
-    d3      : next_rx_state = d4;
-    d4      : next_rx_state = d5;
-    d5      : next_rx_state = d6;
-    d6      : next_rx_state = d7;
-    d7      : next_rx_state = stop;
-    stop    : next_rx_state = idle;
-    default : next_rx_state = idle;
+    START   :   begin
+        next_rx_state = D0;
+    end
+    D0      :   begin
+        next_rx_state = D1;
+    end
+    D1      :   begin
+        next_rx_state = D2;
+    end
+    D2      :   begin
+        next_rx_state = D3;
+    end
+    D3      :   begin
+        next_rx_state = D4;
+    end
+    D4      :   begin
+        next_rx_state = D5;
+    end
+    D5      :   begin
+        next_rx_state = D6;
+    end
+    D6      :   begin
+        next_rx_state = D7;
+    end
+    D7      :   begin
+        next_rx_state = STOP;
+    end
+    STOP    :   begin
+        next_rx_state = IDLE;
+    end
     endcase
 end
 
-endmodule
+//r_data save flipflop
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        r_data <= 8'd0;
+    else
+        r_data[rx_state-2] <= i_rxd;
+end
 
-//led가 나오긴 하는데 유지가 안댐
-//i_rxd가 o_data로 넘어가지가 않네
+//o_data
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        o_rx_data <= 8'd0;
+    else if(rx_state == STOP)
+        o_rx_data <= r_data;
+end
+
+/* combination...?
+always@(*)begin
+    if(rx_state == STOP)
+        o_rx_data = r_data;
+    else
+        o_rx_data = o_data;
+end
+*/
+
+endmodule
