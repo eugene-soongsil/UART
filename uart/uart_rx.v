@@ -3,6 +3,7 @@ module UART_RX(
     input               reset,
     input               i_clk_rx,
     input               i_rxd,
+    output reg          RxDone,
     output reg [7:0]    o_rx_data
 );
 
@@ -88,6 +89,16 @@ always@(posedge clk or negedge reset)begin
         o_rx_data <= 8'd0;
     else if(rx_state == STOP)
         o_rx_data <= r_data;
+end
+
+//RxDone
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        RxDone <= 0;
+    else if(rx_state == STOP)
+        RxDone <= 1;
+    else
+        RxDone <= 0;
 end
 
 /* combination...?
