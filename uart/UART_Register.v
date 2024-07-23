@@ -54,14 +54,9 @@ assign StateReg[1] = (TxDbuffer == 8'd0);               //TXC
 assign StateReg[2] = (TxDbuffer == 8'd0);               //UDRE ??   
 
 //Read logic
-always@(posedge pClk or negedge pReset)begin
-    if(~pReset)
-        pReadData <= 0;
-    else if(TxBRead)
-        pReadData <= {24'd0, TxDbuffer};
-    else if(RxBRead)
-        pReadData <= {24'd0, RxDbuffer};
-end//output for one clk? or maintain output
+assign pReadData =  (TxBRead)? {24'd0, TxDbuffer} :
+                    (RxBRead)? {24'd0, RxDbuffer} : 32'd0;
+
 //assign 으로 뽑아줘야한다 APB에서는 core로 넘겨주는 건 combination
 //요청신호를 보내고 바로 데이터를 가져가기때문에 clk에 물리면 안댐
 

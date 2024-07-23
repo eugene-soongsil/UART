@@ -1,7 +1,7 @@
 module UART_Register_Top(
     input               pClk,
     input               pReset,
-    input               switch,
+    input       [7:0]   switch,
     input               button,
     input               pSel,
     input               pEnable,

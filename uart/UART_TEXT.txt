@@ -1,0 +1,7 @@
+###Test Bench
+8bit switch에 따라서 button edge 시에 Tx에서 전송이 되는지 확인
+RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
+
+1. pClk에 따라서 clk_div 생성 확인
+2. 
+
