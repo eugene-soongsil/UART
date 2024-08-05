@@ -1,15 +1,14 @@
 module UART_Register_Top(
     input               pClk,
     input               pReset,
-    input       [7:0]   switch,
     input               button,
     input               pSel,
     input               pEnable,
     input               pWrite,
     input       [31:0]  pWdata,
     input       [31:0]  pAddr,
-    input       [7:0]   RxD,
-    output      [7:0]   TxD,
+    input               RxD,
+    output              TxD,
     output      [31:0]  pReadData
 );
 
@@ -35,7 +34,7 @@ UART_TX             UART_TX(
     .reset(pReset),
     .i_clk_tx(w_clk_div),
     .i_button_edge(w_button_edge),
-    .i_switch(switch),
+    .i_switch(w_TxData),
     .o_txd(TxD) //out
 );
 

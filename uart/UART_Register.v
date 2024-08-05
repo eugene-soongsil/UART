@@ -10,7 +10,7 @@ module UART_Register(
     input               RxDone,
     input       [7:0]   RxData,
     output      [7:0]   TxData,
-    output  reg [31:0]  pReadData
+    output      [31:0]  pReadData
 );
 
 reg [7:0] TxDbuffer;    //0x00
@@ -18,7 +18,7 @@ reg [7:0] RxDbuffer;    //0x01
 //reg [7:0] UBRR;       //0x02
 //reg [7:0] ControlReg0 //0x03
 //reg [7:0] ControlReg1 //0x04
-reg [7:0] StateReg      //0x05
+//reg [7:0] StateReg;   //0x05
 
 wire   TxBWrite, RxBWrite, TxBRead, RxBRead;
 
@@ -49,15 +49,12 @@ end
 //ControlReg0
 
 //StatusReg
-assign StateReg[0] = (RxDbuffer != 8'd0) || (RxBWrite); //RXC
-assign StateReg[1] = (TxDbuffer == 8'd0);               //TXC
-assign StateReg[2] = (TxDbuffer == 8'd0);               //UDRE ??   
+//assign StateReg[0] = (RxDbuffer != 8'd0) || (RxBWrite); //RXC
+//assign StateReg[1] = (TxDbuffer == 8'd0);               //TXC
+//assign StateReg[2] = (TxDbuffer == 8'd0);               //UDRE ??   
 
 //Read logic
 assign pReadData =  (TxBRead)? {24'd0, TxDbuffer} :
                     (RxBRead)? {24'd0, RxDbuffer} : 32'd0;
-
-//assign 으로 뽑아줘야한다 APB에서는 core로 넘겨주는 건 combination
-//요청신호를 보내고 바로 데이터를 가져가기때문에 clk에 물리면 안댐
 
 endmodule
