@@ -15,3 +15,5 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 
 !!!!
 button edge가 한 clk만 동작해서 clk div에 걸리지 않아서 state가 넘어가지 않는다 (Tx)
+
+START일때부터 

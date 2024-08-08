@@ -44,7 +44,7 @@ initial begin
     reset = 0;
     #10
     reset = 1;
-    RxD = 1'b0;
+    RxD = 1'b1;
 end
 
 initial begin
