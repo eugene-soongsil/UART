@@ -6,13 +6,13 @@ module UART_board(
     output              TxD
 );
 
-wire                    w_div_en, w_clk_div, w_button_edge;
+wire                    w_RxDone, w_div_en, w_clk_rx, w_clk_tx, w_button_edge;
 wire    [7:0]           i_switch;
 
 UART_TX             Tx(
     .clk(clk),
     .reset(reset),
-    .i_clk_tx(w_clk_div),
+    .i_clk_tx(w_clk_tx),
     .i_button_edge(w_button_edge),
     .i_switch(i_switch),
     .o_txd(TxD) //out
@@ -21,9 +21,9 @@ UART_TX             Tx(
 UART_RX             Rx(
     .clk(clk),
     .reset(reset),
-    .i_clk_rx(w_clk_div),
+    .i_clk_rx(w_clk_rx),
     .i_rxd(RxD),
-    .RxDone(), //out
+    .RxDone(w_RxDone), //out
     .div_en(w_div_en),
     .o_rx_data(i_switch)
 );
@@ -32,7 +32,9 @@ clk_div             clk_gen(
     .clk(clk),
     .reset(reset),
     .div_en(w_div_en),
-    .o_clk_div(w_clk_div) //out
+    .RxDone(w_RxDone),
+    .o_clk_rx(w_clk_rx), //out
+    .o_clk_tx(w_clk_tx)
 );
 
 button_edge         edge_detector(

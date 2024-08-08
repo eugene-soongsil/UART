@@ -5,6 +5,7 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 # What to do
 1. TxD, RxD 신호의 딜레이가 딱딱 맞지 않고있음
 2. 샘플링? or UBRR 타이밍 맞출 고민
+!. 16cnt 달고 Rx, Tx, div 유기적으로 동작하도록 묶기
 
 # How
 1. clkdiv를 Rx가 0일때 돌린다? - enable그때부터 키고 끝날때까지 돌린다.
@@ -16,4 +17,4 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 !!!!
 button edge가 한 clk만 동작해서 clk div에 걸리지 않아서 state가 넘어가지 않는다 (Tx)
 
-START일때부터 
+START일때부터

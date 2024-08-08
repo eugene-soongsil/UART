@@ -18,13 +18,13 @@ parameter           IDLE    = 0,
                     D6      = 8,
                     D7      = 9,
                     STOP    = 10;
-reg     [3:0]       tx_state, next_tx_state;
+reg     [3:0]       tx_state, next_tx_state, r_tx_cnt;
 
 //state logic
 always@(posedge clk or negedge reset)begin
     if(~reset)
         tx_state <= IDLE;
-    else if(i_clk_tx)
+    else if(r_tx_cnt == 4'd15)
         tx_state <= next_tx_state;
 end
 
@@ -85,6 +85,14 @@ always@(*)begin
         next_tx_state = IDLE;
     end
     endcase
+end
+
+//16bit counter
+always@(posedge clk or negedge reset)begin
+    if((~reset) || (r_tx_cnt == 4'd15))
+        r_tx_cnt <= 4'd0;
+    else if(i_clk_tx)
+        r_tx_cnt <= r_tx_cnt + 4'd1;
 end
 
 endmodule

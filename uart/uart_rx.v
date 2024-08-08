@@ -3,7 +3,7 @@ module UART_RX(
     input               reset,
     input               i_clk_rx,
     input               i_rxd,
-    output reg          RxDone,
+    output              RxDone,
     output reg          div_en,
     output reg [7:0]    o_rx_data
 );
@@ -19,13 +19,15 @@ parameter           IDLE    = 0,
                     D6      = 8,
                     D7      = 9,
                     STOP    = 10;
-reg     [3:0]       rx_state, next_rx_state;
+reg     [3:0]       rx_state, next_rx_state, r_rx_cnt, s_data;
 reg     [7:0]       r_data;
 
 //state logic
 always@(posedge clk or negedge reset)begin
     if(~reset)
         rx_state <= IDLE;
+    else if(rx_state == START)
+        rx_state <= D0;
     else if(i_clk_rx)
         rx_state <= next_rx_state;
 end
@@ -80,8 +82,8 @@ end
 always@(posedge clk or negedge reset)begin
     if(~reset)
         r_data <= 8'd0;
-    else
-        r_data[rx_state-2] <= i_rxd;
+    else if(r_rx_cnt == 4'd15)
+        r_data[rx_state-2] <= s_data[3];
 end
 
 //o_data
@@ -90,9 +92,14 @@ always@(posedge clk or negedge reset)begin
         o_rx_data <= 8'd0;
     else if(rx_state == STOP)
         o_rx_data <= r_data;
+    else
+        o_rx_data <= 8'd0;
 end
 
-//RxDone
+//RxDone -> assign ???
+//assign RxDone = (rx_state == STOP) ? 1'b1 : 1'b0;
+
+/*
 always@(posedge clk or negedge reset)begin
     if(~reset)
         RxDone <= 0;
@@ -101,9 +108,36 @@ always@(posedge clk or negedge reset)begin
     else
         RxDone <= 0;
 end
+*/
 
+//16bit sampling counter
+always@(posedge clk or negedge reset)begin
+    if((~reset) || (rx_state == IDLE && i_rxd == 0))
+        r_rx_cnt <= 4'd0;
+    else if(i_clk_rx && (r_rx_cnt == 4'd15))
+        r_rx_cnt <= 4'd0;
+    else if(i_clk_rx) //조건문 지움
+        r_rx_cnt <= r_rx_cnt + 4'd1;
+end
+
+//sampling data set
+always@(*)begin
+    if((~reset) || (r_rx_cnt == 4'd0))
+        s_data = 4'd0;
+    else if(r_rx_cnt == 4'd7)
+        s_data[0] = i_rxd;
+    else if(r_rx_cnt == 4'd8)
+        s_data[1] = i_rxd;
+    else if(r_rx_cnt == 4'd9)
+        s_data[2] = i_rxd;
+    else if(r_rx_cnt == 4'd10)
+        s_data[3] = (s_data[2] & s_data[1]) | (s_data[1] & s_data[0]);
+end
+
+//data 전송시에만 전송되도록
 //assign div_en = (rx_state == D0) ? 1'b1 : 1'b0;
 
+/*
 always@(posedge clk or negedge reset)begin
     if(~reset)
         div_en <= 1'b0;
@@ -112,6 +146,7 @@ always@(posedge clk or negedge reset)begin
     else if(rx_state == STOP)
         div_en <= 1'b0;
 end
+*/
 
 /* combination...?
 always@(*)begin
