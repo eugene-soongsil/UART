@@ -26,9 +26,11 @@ reg     [7:0]       r_data;
 always@(posedge clk or negedge reset)begin
     if(~reset)
         rx_state <= IDLE;
+    else if(next_rx_state == START)
+        rx_state <= START;
     else if(rx_state == START)
         rx_state <= D0;
-    else if(i_clk_rx)
+    else if(i_clk_rx && r_rx_cnt == 4'd15)
         rx_state <= next_rx_state;
 end
 
@@ -112,7 +114,7 @@ end
 
 //16bit sampling counter
 always@(posedge clk or negedge reset)begin
-    if((~reset) || (rx_state == IDLE && i_rxd == 0))
+    if((~reset) || (rx_state == IDLE))// && i_rxd == 0))
         r_rx_cnt <= 4'd0;
     else if(i_clk_rx && (r_rx_cnt == 4'd15))
         r_rx_cnt <= 4'd0;
@@ -134,7 +136,6 @@ always@(*)begin
         s_data[3] = (s_data[2] & s_data[1]) | (s_data[1] & s_data[0]);
 end
 
-//data 전송시에만 전송되도록
 //assign div_en = (rx_state == D0) ? 1'b1 : 1'b0;
 
 /*

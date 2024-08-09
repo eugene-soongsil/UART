@@ -26,6 +26,7 @@ always@(posedge clk or negedge reset)begin
     end
 end
 */
+
 /*
 always@(posedge clk or negedge reset)begin
     if(~reset)
