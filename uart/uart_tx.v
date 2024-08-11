@@ -88,10 +88,19 @@ always@(*)begin
 end
 
 //16bit counter
-always@(posedge clk or negedge reset)begin
+/*always@(posedge clk or negedge reset)begin
     if((~reset) || (r_tx_cnt == 4'd15))
         r_tx_cnt <= 4'd0;
     else if(i_clk_tx)
+        r_tx_cnt <= r_tx_cnt + 4'd1;
+end
+*/
+always@(posedge clk or negedge reset)begin
+    if((~reset) || (tx_state == IDLE))// && i_rxd == 0))
+        r_tx_cnt <= 4'd0;
+    else if(i_clk_tx && (r_tx_cnt == 4'd15))
+        r_tx_cnt <= 4'd0;
+    else if(i_clk_tx) //조건문 지움
         r_tx_cnt <= r_tx_cnt + 4'd1;
 end
 

@@ -16,6 +16,7 @@ task rx_in(
 );
 begin
 	@(posedge clk)
+    #104160
 	RxD <= 1'b0;
 	#104160
 	RxD <= i_data[0];
@@ -49,17 +50,29 @@ end
 
 initial begin
     button = 1'b0;
-    rx_in(8'd10);
+    rx_in(8'b0000_1010);
     button = 1'b1;
-    #1041600
+    #1200000
     button = 1'b0;
     rx_in(8'd20);
     button = 1'b1;
-    #1041600
+    #1200000
     button = 1'b0;
     rx_in(8'd30);
     button = 1'b1;
-    #1041600
+    #1200000
+    button = 1'b0;
+    rx_in(8'd100);
+    button = 1'b1;
+    #1200000
+    button = 1'b0;
+    rx_in(8'd200);
+    button = 1'b1;
+    #1200000
+    button = 1'b0;
+    rx_in(8'd255);
+    button = 1'b1;
+    #1200000
     $finish;
 end
 
