@@ -50,7 +50,7 @@ UART_RX             UART_RX(
 clk_div             clk_gen(
     .clk(pClk),
     .reset(pReset),
-    .o_clk_rx(w_clk_rx)
+    .o_clk_rx(w_clk_rx),
     .o_clk_tx(w_clk_tx) //out
 );
 

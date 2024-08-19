@@ -45,23 +45,23 @@ task rx_in(
 begin
 	@(posedge pClk)
 	RxD <= 1'b0;
-	#104166
+	#104160
 	RxD <= i_data[0];
-	#104166
+	#104160
 	RxD <= i_data[1];
-	#104166
+	#104160
 	RxD <= i_data[2];
-	#104166
+	#104160
 	RxD <= i_data[3];
-	#104166
+	#104160
 	RxD <= i_data[4];
-	#104166
+	#104160
 	RxD <= i_data[5];
-	#104166
+	#104160
 	RxD <= i_data[6];
-	#104166
+	#104160
 	RxD <= i_data[7];
-	#104166
+	#104160
 	RxD <= 1'b1;
 end
 endtask
