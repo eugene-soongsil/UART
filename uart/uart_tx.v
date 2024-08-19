@@ -24,7 +24,9 @@ reg     [3:0]       tx_state, next_tx_state, r_tx_cnt;
 always@(posedge clk or negedge reset)begin
     if(~reset)
         tx_state <= IDLE;
-    else if(r_tx_cnt == 4'd15)
+    else if(next_tx_state == START)
+        tx_state <= START;
+    else if(i_clk_tx && r_tx_cnt == 4'd15)
         tx_state <= next_tx_state;
 end
 
@@ -96,7 +98,9 @@ end
 end
 */
 always@(posedge clk or negedge reset)begin
-    if((~reset) || (tx_state == IDLE))// && i_rxd == 0))
+    if(~reset)
+        r_tx_cnt <= 4'd0;
+    else if(tx_state == IDLE)
         r_tx_cnt <= 4'd0;
     else if(i_clk_tx && (r_tx_cnt == 4'd15))
         r_tx_cnt <= 4'd0;

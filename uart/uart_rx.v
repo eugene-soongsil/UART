@@ -3,8 +3,8 @@ module UART_RX(
     input               reset,
     input               i_clk_rx,
     input               i_rxd,
-    output              RxDone,
-    output reg          div_en,
+    //output              RxDone,
+    //output reg          div_en,
     output reg [7:0]    o_rx_data
 );
 
@@ -127,7 +127,9 @@ end
 
 //16bit sampling counter
 always@(posedge clk or negedge reset)begin
-    if((~reset) || (rx_state == IDLE))// && i_rxd == 0))
+    if(~reset)// && i_rxd == 0))
+        r_rx_cnt <= 4'd0;
+    else if(rx_state == IDLE)
         r_rx_cnt <= 4'd0;
     else if(i_clk_rx && (r_rx_cnt == 4'd15))
         r_rx_cnt <= 4'd0;
@@ -137,7 +139,9 @@ end
 
 //sampling data set
 always@(*)begin
-    if((~reset) || (r_rx_cnt == 4'd0))
+    if(~reset)
+        s_data = 4'd0;
+    else if(r_rx_cnt == 4'd0)
         s_data = 4'd0;
     else if(r_rx_cnt == 4'd7)
         s_data[0] = i_rxd;

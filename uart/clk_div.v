@@ -1,8 +1,8 @@
 module clk_div(
     input        clk,
     input        reset,
-    input        RxDone,
-    input        div_en,
+    //input        RxDone,
+    //input        div_en,
     output reg   o_clk_rx,
     output reg   o_clk_tx
 );
@@ -49,7 +49,9 @@ end
 
 //UBRR 650 counter
 always@(posedge clk or negedge reset)begin
-    if((~reset) || (r_cnt == 10'd650) || (RxDone))
+    if(~reset)
+        r_cnt <= 10'd0;
+    else if(r_cnt == 10'd650)
         r_cnt <= 10'd0;
     else
         r_cnt <= r_cnt + 10'd1;

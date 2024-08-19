@@ -6,7 +6,7 @@ module UART_board(
     output              TxD
 );
 
-wire                    w_RxDone, w_div_en, w_clk_rx, w_clk_tx, w_button_edge;
+wire                    w_clk_rx, w_clk_tx, w_button_edge;
 wire    [7:0]           i_switch;
 
 UART_TX             Tx(
@@ -23,16 +23,16 @@ UART_RX             Rx(
     .reset(reset),
     .i_clk_rx(w_clk_rx),
     .i_rxd(RxD),
-    .RxDone(w_RxDone), //out
-    .div_en(w_div_en),
+    //.RxDone(w_RxDone), //out
+    //.div_en(w_div_en),
     .o_rx_data(i_switch)
 );
 
 clk_div             clk_gen(
     .clk(clk),
     .reset(reset),
-    .div_en(w_div_en),
-    .RxDone(w_RxDone),
+    //.div_en(w_div_en),
+    //.RxDone(w_RxDone),
     .o_clk_rx(w_clk_rx), //out
     .o_clk_tx(w_clk_tx)
 );
