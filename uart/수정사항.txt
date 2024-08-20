@@ -5,7 +5,7 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 # What to do
 1. TxD, RxD 신호의 딜레이가 딱딱 맞지 않고있음
 2. 샘플링? or UBRR 타이밍 맞출 고민
-!. 16cnt 달고 Rx, Tx, div 유기적으로 동작하도록 묶기
+3. 16cnt 달고 Rx, Tx, div 유기적으로 동작하도록 묶기
 
 # How
 1. clkdiv를 Rx가 0일때 돌린다? - enable그때부터 키고 끝날때까지 돌린다.
@@ -14,7 +14,9 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 #Trouble shooting
 1. button edge가 한 clk만 동작해서 clk div에 걸리지 않아서 state가 넘어가지 않는다
 -> 해결
+
 2. 우선 RX data 수신은 확인했는데 RxDone, div_en 신호가 필요 없을것같은데 확인해보기
+-> 결국에 Register에서는 필요하다.
 
 3. Tx 해결합시다
 -> state가 넘어가지 않음 Tx counter 점검하면 괜찮아질듯 싶음
@@ -31,4 +33,11 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 -> Status, Control Register 기능 구상하고 추가
 
 7. Register 기능 추가
-->
+-> 기능들 ppt보면서 최대한 넣어봤으나 아직 기능적으로 이해가 안되는 부분들이 많음.
+-> Register에 더 뚫어줘야하는 선들이 많은거 같은데 이게 맞는지 잘 모르겠음 물어보자.
+-> DataPakit 말고도 ParityBit, ParityDetector, RxStopbit
+같은 것들이 Register에 필요하다... 그냥 다 뚫어버리고 넣어주면 되는지?
+RxStopBit, TxStart, TxDone
+! parity는 제끼자 !
+-> 32bit 패킷 유지, pWdata에서 한번에 CPU의 input신호를 받아온다.
+ControlReg0의 플래그는 pWdata에서 가져옴 + TxData도
