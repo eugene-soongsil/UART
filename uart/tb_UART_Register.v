@@ -4,7 +4,7 @@ reg             pClk, pReset, button, pSel, pEnable, pWrite;
 reg     [31:0]  pWdata, pAddr;
 reg             RxD;
 wire            TxD;
-wire    [31:0]  pReadData;
+wire    [31:0]  IRQ, pReadData;
 
 UART_Register_Top   top(
     .pClk(pClk),
@@ -20,22 +20,23 @@ UART_Register_Top   top(
     .pReadData(pReadData)    
 );
 
-task Ureg(
+task CPU_input(
     input        write,
-    input [31:0] Txdata,
+    input [31:0] CPUdata,
     input [31:0] RegAddr
 );
 begin
     @(posedge pClk)
-    button <= 1'b1;
-    pSel <= 1'b1;
-    pWrite <= write;
-    pAddr <= RegAddr;
+    button  <= 1'b1;
+    pSel    <= 1'b1;
+    pWrite  <= write;
+    pAddr   <= RegAddr;
     @(posedge pClk)
     pEnable <= 1'b1;
-    pWdata <= Txdata;
+    pWdata  <= CPUdata;
     @(posedge pClk)
-    button <= 1'b0;
+    button  <= 1'b0;
+    pSel    <= 1'b0;
 end
 endtask
 
@@ -77,13 +78,17 @@ end
 
 initial begin
     #25
-    Ureg(1'b1, 32'd10, 32'd0); //Tx data 10 transmit
+    CPU_input(1'b1, 32'd10, 32'd0); //Tx data 10 transmit
     #(104160*10);
-    Ureg(1'b0, 32'd0, 32'd0); //Tx buffer read
+    CPU_input(1'b0, 32'd0, 32'd0); //Tx buffer read
     #(104160*10);
     rx_in(8'd20);
     #(104160*10);
-    Ureg(1'b0, 32'd0, 32'd1); //Rx data read
+    CPU_input(1'b0, 32'd0, 32'd1); //Rx data read
+    #(104160*10);
+    CPU_input(1'b1, 32'h00FFFF00, 32'd3);
+    #(104160*10);
+    CPU_input(1'b1, 32'h00FFFF00, 32'd4);
     #(104160*10);
     $finish;
 end

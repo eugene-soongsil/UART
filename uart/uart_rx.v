@@ -5,6 +5,7 @@ module UART_RX(
     input               i_rxd,
     output              RxDone,
     //output reg          div_en,
+    output reg          RxStopBit,
     output reg [7:0]    o_rx_data
 );
 
@@ -112,7 +113,15 @@ always@(posedge clk or negedge reset)begin
 end
 
 //RxDone -> assign ???
-assign RxDone = (rx_state == STOP) ? 1'b1 : 1'b0;
+assign RxDone    = (rx_state == STOP) ? 1'b1 : 1'b0;
+
+//FF ? Combination?
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        RxStopBit = 1'b0;
+    else if(RxDone)
+        RxStopBit = i_rxd;
+end
 
 /*
 always@(posedge clk or negedge reset)begin

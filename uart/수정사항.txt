@@ -1,6 +1,11 @@
 ###Test Bench
+1. Tx, Rx
 8bit switch에 따라서 button edge 시에 Tx에서 전송이 되는지 확인
 RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
+2. Register
+CPU에서 주는 pWdata가 Control Register에 알맞게 들어가는지 확인 - OK
+Rx, Tx의 상태에 맞게 Status Register에 알맞게 들어가는지 확인   
+IRQ시에 Status Register를 알맞게 보내는지 확인                 - O...K
 
 # What to do
 1. TxD, RxD 신호의 딜레이가 딱딱 맞지 않고있음
@@ -39,5 +44,21 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 같은 것들이 Register에 필요하다... 그냥 다 뚫어버리고 넣어주면 되는지?
 RxStopBit, TxStart, TxDone
 ! parity는 제끼자 !
+
 -> 32bit 패킷 유지, pWdata에서 한번에 CPU의 input신호를 받아온다.
 ControlReg0의 플래그는 pWdata에서 가져옴 + TxData도
+
+8. buffer 수정
+-> TxB는 data 전송 완료시 clear, RxB는 FIFO 구조 설계
+
+9. 일단 Control Register는 pAddr이 설정 될때만 pWdata에 의해 바뀌도록 설정하였다.
+-> State Register는 Rx, Tx상태에 의해서 clk에 동기화되어서 변경되도록 설정
+-> State Register는 enable 신호가 필요없는지? 값을 유지하고 있어야하는데 clk에 따라 변화.
+
+10. UBRR Register 설계
+-> Clk_div 모듈 수정하고 동작확인
+-> 어떤 방식으로 UBRR을 나누는지 구글링하기
+
+
+@@@@@@
+펌웨어가 없는데 어떻게 Register 달고 온보딩을....?

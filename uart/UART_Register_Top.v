@@ -9,10 +9,11 @@ module UART_Register_Top(
     input       [31:0]  pAddr,
     input               RxD,
     output              TxD,
+    output      [31:0]  IRQ,
     output      [31:0]  pReadData
 );
 
-wire                w_button_edge, w_clk_tx, w_clk_rx, w_RxDone;
+wire                w_button_edge, w_clk_tx, w_clk_rx, w_RxDone, w_RxStopBit;
 wire    [7:0]       w_RxData, w_TxData;
 
 UART_Register       UART_REG(
@@ -23,9 +24,11 @@ UART_Register       UART_REG(
     .pWrite(pWrite),
     .pWdata(pWdata),
     .pAddr(pAddr),
+    .RxStopBit(w_RxStopBit),
     .RxDone(w_RxDone),
     .RxData(w_RxData),
     .TxData(w_TxData), //out
+    .IRQ(IRQ),
     .pReadData(pReadData)
 );
 
@@ -44,6 +47,7 @@ UART_RX             UART_RX(
     .i_clk_rx(w_clk_rx),
     .i_rxd(RxD),
     .RxDone(w_RxDone), //out
+    .RxStopBit(w_RxStopBit),
     .o_rx_data(w_RxData)
 );
 
