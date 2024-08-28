@@ -2,7 +2,7 @@ module UART_TX(
     input           clk,
     input           reset,
     input           i_clk_tx,
-    input           i_button_edge,
+    input           TxEn,
     input   [7:0]   i_switch,
     output  reg     o_txd
 );
@@ -37,7 +37,7 @@ always@(*)begin
 
     case(tx_state)
     IDLE    :   begin
-        if(i_button_edge)begin
+        if(TxEn)begin
             o_txd = 1'b1;
             next_tx_state = START;
         end

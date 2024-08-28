@@ -1,7 +1,7 @@
 module UART_Register_Top(
     input               pClk,
     input               pReset,
-    input               button,
+    //input               button,
     input               pSel,
     input               pEnable,
     input               pWrite,
@@ -13,7 +13,7 @@ module UART_Register_Top(
     output      [31:0]  pReadData
 );
 
-wire                w_button_edge, w_clk_tx, w_clk_rx, w_RxDone, w_RxStopBit;
+wire                w_TxEn, w_clk_tx, w_clk_rx, w_RxDone, w_RxStopBit;
 wire    [7:0]       w_RxData, w_TxData;
 
 UART_Register       UART_REG(
@@ -28,6 +28,7 @@ UART_Register       UART_REG(
     .RxDone(w_RxDone),
     .RxData(w_RxData),
     .TxData(w_TxData), //out
+    .TxEn(w_TxEn),
     .IRQ(IRQ),
     .pReadData(pReadData)
 );
@@ -36,7 +37,7 @@ UART_TX             UART_TX(
     .clk(pClk),
     .reset(pReset),
     .i_clk_tx(w_clk_tx),
-    .i_button_edge(w_button_edge),
+    .TxEn(w_TxEn),
     .i_switch(w_TxData),
     .o_txd(TxD) //out
 );
@@ -58,11 +59,11 @@ clk_div             clk_gen(
     .o_clk_tx(w_clk_tx) //out
 );
 
-button_edge         edge_detector(
+/*button_edge         edge_detector(
     .clk(pClk),
     .reset(pReset),
     .i_button(button),
     .o_button_edge(w_button_edge) //out
 );
-
+*/
 endmodule

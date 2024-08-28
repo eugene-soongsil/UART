@@ -11,6 +11,7 @@ module UART_Register(
     input               RxStopBit,
     input               RxDone,
     input       [7:0]   RxData,
+    output              TxEn,
     output      [7:0]   TxData,
     output      [31:0]  IRQ,
     output      [31:0]  pReadData
@@ -26,29 +27,49 @@ reg [7:0] StatusReg;    //0x05
 
 //--------------------------Buffer Register------------------------------
 wire   TxBWrite, RxBWrite, TxBRead, RxBRead;
-
+wire   TxEmpty, TxFull, RxEmpty, RxFull;
 //Buffer Signal
-assign TxBWrite = pSel && pEnable && pWrite && (pAddr[7:0] == 8'h00);
-assign TxBRead = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h00);
-assign RxBRead = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h01);
+assign TxBWrite = pSel && pEnable && pWrite    && (pAddr[7:0] == 8'h00);
+assign TxBRead  = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h00);
+assign RxBRead  = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h01);
 
 //TxDbuffer
-always@(posedge pClk or negedge pReset)begin
+FIFO                TX_FIFO(
+    .clk(pClk),
+    .reset(pReset),
+    .rd(TxEn),
+    .wr(TxBWrite),
+    .wr_data(pWdata[7:0]),
+    .empty(TxEmpty), //out
+    .full(TxFull),
+    .rd_data(TxData)
+);
+/*always@(posedge pClk or negedge pReset)begin
     if(~pReset)
         TxDbuffer <= 0;
     else if(TxBWrite)
         TxDbuffer <= pWdata[7:0];
-end
+end*/
 //TxData output
-assign TxData = TxDbuffer; //TxEn && TxDbuffer or TxEn is button edge of TX
+//assign TxData = TxDbuffer; //TxEn && TxDbuffer or TxEn is button edge of TX
 
 //RxDbuffer
-always@(posedge pClk or negedge pReset)begin
+FIFO                RX_FIFO(
+    .clk(pClk),
+    .reset(pReset),
+    .rd(RxBRead),
+    .wr(RxEn),
+    .wr_data(RxData),
+    .empty(RxEmpty), //out
+    .full(RxFull),
+    .rd_data(RxB)
+);
+/*always@(posedge pClk or negedge pReset)begin
     if(~pReset)
         RxDbuffer <= 0;
-    else if(RxDone)
+    else if(RxDone) //&&RxEn
         RxDbuffer <= RxData;
-end
+end*/
 //-------------------------end Buffer Register----------------------------
 
 //-------------------------Control Register----------------------------
@@ -57,7 +78,7 @@ wire   [3:0]      UBRRH;
 wire   TxEn, RxEn, TxCIE, RxCIE, CR0_en;
 
 assign TxEn     = pWdata[8];    //Tx enable
-assign RxEn     = pWdata[9];    //Rx enable
+assign RxEn     = pWdata[9] && RxDone;    //Rx enable
 assign TxCIE    = pWdata[10];   //Tx Complete Interrupt Enable
 assign RxCIE    = pWdata[11];   //Rx Complete Interrupt Enable
 assign UBRRH    = pWdata[15:12];//UBRR High
@@ -104,10 +125,10 @@ end
 wire   RxC, TxC, UDRE, FE, DOR;
 
 assign RxC  = RxDone;              //Rx Complete 
-assign TxC  = (TxDbuffer == 8'd0); //need TxB clear              
-assign UDRE = (TxDbuffer == 8'd0); //???   
+assign TxC  = TxEmpty; //need TxB clear              
+assign UDRE = TxEmpty; //???   
 assign FE   = RxDone && ~RxStopBit;
-assign DOR  = RxDbuffer == 1;      //need RxB FIFO mem
+assign DOR  = RxFull && RxEn;      //need RxB FIFO mem
 //assign UPE  = 
 
 //need enable signal ? remain signal ?
@@ -124,8 +145,8 @@ always@(posedge pClk or negedge pReset)begin
 end
 //-------------------------end Status Register--------------------------
 //Read Output Logic
-assign pReadData =  (TxBRead) ? {24'd0, TxDbuffer} :
-                    (RxBRead) ? {24'd0, RxDbuffer} : 32'd0;
+assign pReadData =  //(TxBRead) ? {24'd0, TxDbuffer} :
+                    (RxBRead) ? {24'd0, RxB} : 32'd0;
 assign IRQ = (TxCIE && ControlReg0[2] || RxCIE && ControlReg0[3]) 
             ? {24'd0, StatusReg} : 32'd0;
 

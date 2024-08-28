@@ -59,6 +59,10 @@ ControlReg0의 플래그는 pWdata에서 가져옴 + TxData도
 -> Clk_div 모듈 수정하고 동작확인
 -> 어떤 방식으로 UBRR을 나누는지 구글링하기
 
+11. FIFO 작성하고 Tx, Rx 인스턴스 완료
+-> Enable 신호들 만졌음 안돌아가면 FIFO랑 Enable 신호가 맞지 않는 거임
+-> 추가적으로 Status Register 조건신호들 수정하였음
+-> 이에 맞게 TB 수정해야할 것으로 보임
 
 @@@@@@
 펌웨어가 없는데 어떻게 Register 달고 온보딩을....?
