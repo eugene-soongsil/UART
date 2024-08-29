@@ -2,8 +2,9 @@ module UART_TX(
     input           clk,
     input           reset,
     input           i_clk_tx,
-    input           TxEn,
+    input           TxEn, // or TxEn edge ?
     input   [7:0]   i_switch,
+    output  reg     TxDone,
     output  reg     o_txd
 );
 
@@ -34,6 +35,7 @@ end
 always@(*)begin
     o_txd = 1'b1;
     next_tx_state = tx_state;
+    TxDone = 1'b0;
 
     case(tx_state)
     IDLE    :   begin
@@ -85,6 +87,7 @@ always@(*)begin
     STOP    :   begin
         o_txd = 1'b1;
         next_tx_state = IDLE;
+        TxDone = 1'b1;
     end
     endcase
 end

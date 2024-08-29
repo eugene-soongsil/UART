@@ -1,6 +1,6 @@
 module tb_UART_Register;
 
-reg             pClk, pReset, button, pSel, pEnable, pWrite;
+reg             pClk, pReset, pSel, pEnable, pWrite;
 reg     [31:0]  pWdata, pAddr;
 reg             RxD;
 wire            TxD;

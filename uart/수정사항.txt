@@ -6,6 +6,9 @@ RxD가 RxDone신호에 맞게 RxDbuffer에 저장이 되는지 확인
 CPU에서 주는 pWdata가 Control Register에 알맞게 들어가는지 확인 - OK
 Rx, Tx의 상태에 맞게 Status Register에 알맞게 들어가는지 확인   
 IRQ시에 Status Register를 알맞게 보내는지 확인                 - O...K
+3. Register FIFO
+CPU에서 data를 1개씩 보내 FIFO에 저장하도록 한다.
+이후 TxEn신호를 보내줘서 FIFO에 저장된 데이터들이 모두 송신되는지 확인.
 
 # What to do
 1. TxD, RxD 신호의 딜레이가 딱딱 맞지 않고있음
@@ -64,5 +67,16 @@ ControlReg0의 플래그는 pWdata에서 가져옴 + TxData도
 -> 추가적으로 Status Register 조건신호들 수정하였음
 -> 이에 맞게 TB 수정해야할 것으로 보임
 
+12. FIFO Buffer 분리하기, FIFO wr 신호 enable 트리거
+TX : CPU -> FIFO -> Buffer -> Tx
+RX : Rx -> Buffer -> FIFO -> CPU
+
++ TxEn edge, TxB edge 와 같은 edge 신호 분배 어떻게할지?? Tx에도 그렇게 꼽는게 좋을지 아니면 자동으로 나가도록..?
+
+13. 32bit를 8bit만 사용하기
+
+14. pReadData로 모든 Register 읽을 수 있도록 수정
+
 @@@@@@
 펌웨어가 없는데 어떻게 Register 달고 온보딩을....?
+내일 RxFIFO하기

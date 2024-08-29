@@ -47,7 +47,7 @@ assign rd_data = array_reg[rd_ptr_reg];
 always@(*)begin
     //default values
     rd_ptr_next     = rd_ptr_reg;
-    wr_ptr_next    = wr_ptr_reg;
+    wr_ptr_next     = wr_ptr_reg;
     full_next       = full_reg;
     empty_next      = empty_reg;
     //read or write
@@ -62,7 +62,7 @@ always@(*)begin
         2'b10: //write
         if(~full_reg)begin //if buffer not full
             wr_ptr_next = wr_ptr_reg + 1;
-            empty_next = 1'b0; //after write, buffer is not empty
+            empty_next  = 1'b0; //after write, buffer is not empty
             if(wr_ptr_next == rd_ptr_reg)//when 2 pointers equal
                 full_next = 1'b1;
         end
