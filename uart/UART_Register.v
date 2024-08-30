@@ -83,7 +83,7 @@ FIFO                RX_FIFO(
     .clk(pClk),
     .reset(pReset),
     .rd(RxBRead_edge),
-    .wr(RxDone_edge), //timing ok?
+    .wr(RxEn), //timing ok?
     .wr_data(RxDbuffer),
     .empty(RxEmpty), //out
     .full(RxFull),
@@ -93,7 +93,7 @@ FIFO                RX_FIFO(
 always@(posedge pClk or negedge pReset)begin
     if(~pReset)
         RxDbuffer <= 0;
-    else if(RxDone_edge && RxEn) //&&RxEn
+    else if(RxDone_edge) //&&RxEn
         RxDbuffer <= RxData;
 end
 
@@ -123,7 +123,7 @@ assign TxEn     = pWdata[0] && CR0_en;           //Tx enable
 assign RxEn     = pWdata[1] && CR0_en;           //Rx enable
 assign TxCIE    = pWdata[2];          //Tx Complete Interrupt Enable
 assign RxCIE    = pWdata[3];          //Rx Complete Interrupt Enable
-assign UBRRH    = pWdata[7:4];       //UBRR High
+assign UBRRH    = pWdata[7:4];        //UBRR High
 
 assign CR0_en   = pSel && pEnable && pWrite && (pAddr[7:0] == 8'h03);
 
