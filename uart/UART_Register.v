@@ -15,7 +15,7 @@ module UART_Register(
     output      [7:0]   TxData,
     output      [31:0]  IRQ,
     output      [31:0]  pReadData
-);      
+);
 
 //Register
 reg [7:0] TxDbuffer;    //0x00
@@ -31,7 +31,7 @@ reg    r_RxDone, r_RxBRead;
 
 wire   [7:0]     Tx_FIFOtoBuffer;
 wire   TxFIFO_write, TxEn_edge;
-wire   TxBWrite, RxBWrite, TxBRead, RxBRead;
+wire   TxBWrite, TxBRead, RxBRead;
 wire   TxEmpty, TxFull, RxEmpty, RxFull;
 //Buffer Signal
 assign TxBWrite = pSel && pEnable && pWrite    && (pAddr[7:0] == 8'h00);
@@ -112,13 +112,11 @@ always@(posedge pClk or negedge pReset)begin
         r_RxBRead <= RxBRead;
 end
 assign RxBRead_edge = (RxBRead != r_RxBRead) && RxBRead;
-
-
 //-------------------------end Buffer Register----------------------------\\
 
 //---------------------------Control Register------------------------------\\
 //ControlReg0
-wire   [3:0]      UBRRH;
+wire   [3:0]       UBRRH;
 wire   TxEn, RxEn, TxCIE, RxCIE, CR0_en;
 
 assign TxEn     = pWdata[0] && CR0_en;           //Tx enable
@@ -154,7 +152,7 @@ assign CR1_en   = pSel && pEnable && pWrite && (pAddr[7:0] == 8'h04);
 
 always@(posedge pClk or negedge pReset)begin
     if(~pReset)
-        ControlReg1 <= 0;
+        ControlReg1 <= 8'd0;
     else if(CR1_en)begin
         ControlReg1[1:0] <= DLS;
         ControlReg1[2]   <= STOP;
@@ -178,7 +176,7 @@ assign DOR  = RxFull && RxEn;      //need RxB FIFO mem
 //need enable signal ? remain signal ?
 always@(posedge pClk or negedge pReset)begin
     if(~pReset)
-        StatusReg <= 0;
+        StatusReg <= 8'd0;
     else begin
         StatusReg[0] <= RxC;
         StatusReg[1] <= TxC;
@@ -189,9 +187,21 @@ always@(posedge pClk or negedge pReset)begin
 end
 //-------------------------end Status Register--------------------------\\
 //Read Output Logic
-assign pReadData =  //(TxBRead) ? {24'd0, TxDbuffer} :
-                    (RxBRead) ? {24'd0, RxB} : 32'd0;
+wire   UBRR_Read, ControlReg0_Read, ControlReg1_Read, StatusReg_Read;
+
+assign UBRR_Read         = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h02);
+assign ControlReg0_Read  = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h03);
+assign ControlReg1_Read  = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h04);
+assign StatusReg_Read    = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h05);
+
+assign pReadData =  TxBRead          ? {24'd0, TxDbuffer} :
+                    RxBRead          ? {24'd0, RxDbuffer} :
+                    UBRR_Read        ? {24'd0, UBRR} :
+                    ControlReg0_Read ? {24'd0, ControlReg0} :
+                    ControlReg1_Read ? {24'd0, ControlReg1} :
+                    StatusReg_Read   ? {24'd0, StatusReg};
+
 assign IRQ = (TxCIE && ControlReg0[2] || RxCIE && ControlReg0[3]) 
-            ? {24'd0, StatusReg} : 32'd0;
+            ? {24'd0, StatusReg} : 32'd0; //1bit? Condition Check
 
 endmodule
