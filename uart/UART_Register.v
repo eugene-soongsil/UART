@@ -27,7 +27,7 @@ reg [7:0] StatusReg;    //0x05
 
 //--------------------------Buffer Register------------------------------\\
 reg    r_TxBWrite, r_TxEn;
-
+reg    r_RxDone, r_RxBRead;
 
 wire   [7:0]     Tx_FIFOtoBuffer;
 wire   TxFIFO_write, TxEn_edge;
@@ -82,8 +82,8 @@ assign TxEn_edge = (TxEn != r_TxEn) && r_TxEn;
 FIFO                RX_FIFO(
     .clk(pClk),
     .reset(pReset),
-    .rd(RxBRead),
-    .wr(RxEn),
+    .rd(RxBRead_edge),
+    .wr(RxDone_edge), //timing ok?
     .wr_data(RxDbuffer),
     .empty(RxEmpty), //out
     .full(RxFull),
@@ -105,6 +105,14 @@ always@(posedge pClk or negedge pReset)begin
 end
 assign RxDone_edge = (RxDone != r_RxDone) && r_RxDone;
 
+always@(posedge pClk or negedge pReset)begin
+    if(~pReset)
+        r_RxBRead <= 0;
+    else
+        r_RxBRead <= RxBRead;
+end
+assign RxBRead_edge = (RxBRead != r_RxBRead) && RxBRead;
+
 
 //-------------------------end Buffer Register----------------------------\\
 
@@ -113,11 +121,11 @@ assign RxDone_edge = (RxDone != r_RxDone) && r_RxDone;
 wire   [3:0]      UBRRH;
 wire   TxEn, RxEn, TxCIE, RxCIE, CR0_en;
 
-assign TxEn     = pWdata[8];           //Tx enable
-assign RxEn     = pWdata[9]; //Rx enable
-assign TxCIE    = pWdata[10];          //Tx Complete Interrupt Enable
-assign RxCIE    = pWdata[11];          //Rx Complete Interrupt Enable
-assign UBRRH    = pWdata[15:12];       //UBRR High
+assign TxEn     = pWdata[0] && CR0_en;           //Tx enable
+assign RxEn     = pWdata[1] && CR0_en;           //Rx enable
+assign TxCIE    = pWdata[2];          //Tx Complete Interrupt Enable
+assign RxCIE    = pWdata[3];          //Rx Complete Interrupt Enable
+assign UBRRH    = pWdata[7:4];       //UBRR High
 
 assign CR0_en   = pSel && pEnable && pWrite && (pAddr[7:0] == 8'h03);
 
@@ -137,10 +145,10 @@ end
 wire [1:0]  DLS; 
 wire        STOP, PEN, EPS, CR1_en;
 
-assign DLS      = pWdata[17:16]; //Data Length Select 0x0 : 5bits per  character
-assign STOP     = pWdata[18]; //Number of Stop bits
-assign PEN      = pWdata[19]; //Parity Enable
-assign EPS      = pWdata[20]; //Even Parity Select
+assign DLS      = pWdata[1:0]; //Data Length Select 0x0 : 5bits per  character
+assign STOP     = pWdata[2];    //Number of Stop bits
+assign PEN      = pWdata[3];    //Parity Enable
+assign EPS      = pWdata[4];    //Even Parity Select
 
 assign CR1_en   = pSel && pEnable && pWrite && (pAddr[7:0] == 8'h04);
 
@@ -161,8 +169,8 @@ end
 wire   RxC, TxC, UDRE, FE, DOR;
 
 assign RxC  = RxDone;              //Rx Complete 
-assign TxC  = TxEmpty; //need TxB clear              
-assign UDRE = TxEmpty; //???   
+assign TxC  = TxEmpty;             //need TxB clear              
+assign UDRE = TxEmpty;             //???   
 assign FE   = RxDone && ~RxStopBit;
 assign DOR  = RxFull && RxEn;      //need RxB FIFO mem
 //assign UPE  = 

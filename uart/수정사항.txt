@@ -80,3 +80,4 @@ RX : Rx -> Buffer -> FIFO -> CPU
 @@@@@@
 펌웨어가 없는데 어떻게 Register 달고 온보딩을....?
 내일 RxFIFO하기
+8/30 pReadData 바꾸고 testbench 작성하고 시뮬레이션 해보면 될듯
