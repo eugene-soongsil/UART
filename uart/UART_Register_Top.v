@@ -13,7 +13,7 @@ module UART_Register_Top(
     output      [31:0]  pReadData
 );
 
-wire                w_TxEn, w_clk_tx, w_clk_rx, w_RxDone, w_RxStopBit;
+wire                w_TxStart, w_clk_tx, w_clk_rx, w_RxDone, w_RxStopBit, w_TxDone;
 wire    [7:0]       w_RxData, w_TxData;
 
 UART_Register       UART_REG(
@@ -24,11 +24,12 @@ UART_Register       UART_REG(
     .pWrite(pWrite),
     .pWdata(pWdata),
     .pAddr(pAddr),
+    .TxDone(w_TxDone),
     .RxStopBit(w_RxStopBit),
     .RxDone(w_RxDone),
     .RxData(w_RxData),
     .TxData(w_TxData), //out
-    .TxEn(w_TxEn),
+    .TxStart(w_TxStart),
     .IRQ(IRQ),
     .pReadData(pReadData)
 );
@@ -37,8 +38,9 @@ UART_TX             UART_TX(
     .clk(pClk),
     .reset(pReset),
     .i_clk_tx(w_clk_tx),
-    .TxEn(w_TxEn),
+    .TxStart(w_TxStart),
     .i_switch(w_TxData),
+    .TxDone(w_TxDone),
     .o_txd(TxD) //out
 );
 

@@ -2,9 +2,9 @@ module UART_TX(
     input           clk,
     input           reset,
     input           i_clk_tx,
-    input           TxEn, // or TxEn edge ?
+    input           TxStart, // or TxEn edge ?
     input   [7:0]   i_switch,
-    output  reg     TxDone,
+    output          TxDone,
     output  reg     o_txd
 );
 
@@ -20,6 +20,7 @@ parameter           IDLE    = 0,
                     D7      = 9,
                     STOP    = 10;
 reg     [3:0]       tx_state, next_tx_state, r_tx_cnt;
+reg                 r_TxDone;
 
 //state logic
 always@(posedge clk or negedge reset)begin
@@ -35,11 +36,10 @@ end
 always@(*)begin
     o_txd = 1'b1;
     next_tx_state = tx_state;
-    TxDone = 1'b0;
 
     case(tx_state)
     IDLE    :   begin
-        if(TxEn)begin
+        if(TxStart)begin
             o_txd = 1'b1;
             next_tx_state = START;
         end
@@ -87,10 +87,19 @@ always@(*)begin
     STOP    :   begin
         o_txd = 1'b1;
         next_tx_state = IDLE;
-        TxDone = 1'b1;
     end
     endcase
 end
+//negedge TxDone ????
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        r_TxDone <= 0;
+    else if(tx_state == STOP)
+        r_TxDone <= 1;
+    else
+        r_TxDone <= 0;
+end
+assign TxDone =  ((tx_state == STOP) != r_TxDone) && r_TxDone;        
 
 //16bit counter
 /*always@(posedge clk or negedge reset)begin

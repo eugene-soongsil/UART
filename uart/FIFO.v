@@ -10,7 +10,7 @@ module FIFO(
 );
 
 parameter               B = 8;
-parameter               W = 8;
+parameter               W = 4;
 
 reg         [B-1:0]     array_reg[2**W-1:0];
 reg         [W-1:0]     wr_ptr_reg, wr_ptr_next;
@@ -33,7 +33,6 @@ always@(posedge clk or negedge reset)begin
         empty_reg  <= empty_next;
     end
 end
-
 //------------------------ 2. Array Register ---------------------------\\
 //Write Operation
 always@(posedge clk)
@@ -41,8 +40,6 @@ always@(posedge clk)
         array_reg[wr_ptr_reg] <= wr_data;
 //Read Operation
 assign rd_data = array_reg[rd_ptr_reg];
-
-
 //------------------------ 3. Next State Logic -------------------------\\
 always@(*)begin
     //default values
@@ -54,7 +51,7 @@ always@(*)begin
     case({wr, rd})
         2'b01: //read
         if(~empty_reg)begin //if buffer not empty
-            wr_ptr_next = rd_ptr_reg + 1;
+            rd_ptr_next = rd_ptr_reg + 1;
             full_next   = 1'b0; //after read, buffer is not full
             if(rd_ptr_next == wr_ptr_reg) //when 2 pointers equal
                 empty_next = 1'b1;
@@ -66,14 +63,13 @@ always@(*)begin
             if(wr_ptr_next == rd_ptr_reg)//when 2 pointers equal
                 full_next = 1'b1;
         end
-        2'b11:begin//read and write
+        2'b11: begin//read and write
         rd_ptr_next = rd_ptr_reg + 1;
         wr_ptr_next = wr_ptr_reg + 1;
         end
         default: ;
     endcase
 end
-
 //---------------------- 4. Output Logic -----------------------------\\
 //rd_data is already described in
 assign full  = full_reg;

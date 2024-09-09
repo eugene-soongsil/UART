@@ -11,7 +11,7 @@ module UART_Register(
     input               RxStopBit,
     input               RxDone,
     input       [7:0]   RxData,
-    output              TxEn,
+    output              TxStart,
     output      [7:0]   TxData,
     output      [31:0]  IRQ,
     output      [31:0]  pReadData
@@ -30,7 +30,7 @@ reg    r_TxBWrite, r_TxEn;
 reg    r_RxDone, r_RxBRead;
 
 wire   [7:0]     Tx_FIFOtoBuffer;
-wire   TxFIFO_write, TxEn_edge;
+wire   TxFIFO_write;
 wire   TxBWrite, RxBWrite, TxBRead, RxBRead;
 wire   TxEmpty, TxFull, RxEmpty, RxFull;
 //Buffer Signal
@@ -42,8 +42,8 @@ assign RxBRead  = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h01);
 FIFO                TX_FIFO(
     .clk(pClk),
     .reset(pReset),
-    .rd(TxEn_edge),
-    .wr(TxFIFO_write),
+    .rd(TxStart),
+    .wr(TxBWrite),
     .wr_data(pWdata[7:0]),
     .empty(TxEmpty), //out
     .full(TxFull),
@@ -53,9 +53,11 @@ FIFO                TX_FIFO(
 always@(posedge pClk or negedge pReset)begin
     if(~pReset)
         TxDbuffer <= 0;
-    else if(TxEn_edge || (TxDone && ~TxEmpty)) //after 1clk FIFO output, OK...? or TxBWrite?
+    else if(TxStart) //after 1clk FIFO output, OK...? or TxBWrite?
         TxDbuffer <= Tx_FIFOtoBuffer;
 end
+
+assign TxStart = TxEn_edge || (TxDone && ~TxEmpty);
 
 //TxData output
 assign TxData = TxDbuffer; //TxEn && TxDbuffer or TxEn is button edge of TX
@@ -67,8 +69,7 @@ always@(posedge pClk or negedge pReset)begin
     else
         r_TxBWrite <= TxBWrite;
 end
-assign TxFIFO_write = (TxBWrite != r_TxBWrite) && r_TxBWrite;
-
+assign TxFIFO_write = (TxBWrite != r_TxBWrite) && TxBWrite;
 //TxEn Rising edge
 always@(posedge pClk or negedge pReset)begin
     if(~pReset)
@@ -76,14 +77,14 @@ always@(posedge pClk or negedge pReset)begin
     else
         r_TxEn <= TxEn;
 end
-assign TxEn_edge = (TxEn != r_TxEn) && r_TxEn;
+assign TxEn_edge = (TxEn != r_TxEn) && TxEn;
 
 //RxDbuffer
 FIFO                RX_FIFO(
     .clk(pClk),
     .reset(pReset),
     .rd(RxBRead_edge),
-    .wr(RxDone_edge), //timing ok?
+    .wr(RxStart), //timing ok?
     .wr_data(RxDbuffer),
     .empty(RxEmpty), //out
     .full(RxFull),
@@ -93,10 +94,13 @@ FIFO                RX_FIFO(
 always@(posedge pClk or negedge pReset)begin
     if(~pReset)
         RxDbuffer <= 0;
-    else if(RxDone_edge && RxEn) //&&RxEn
+    else if(RxDone) //&&RxEn
         RxDbuffer <= RxData;
 end
 
+assign RxStart = RxDone_edge && ControlReg0[1];
+
+//RxDone delete?
 always@(posedge pClk or negedge pReset)begin
     if(~pReset)
         r_RxDone <= 0;
@@ -112,8 +116,6 @@ always@(posedge pClk or negedge pReset)begin
         r_RxBRead <= RxBRead;
 end
 assign RxBRead_edge = (RxBRead != r_RxBRead) && RxBRead;
-
-
 //-------------------------end Buffer Register----------------------------\\
 
 //---------------------------Control Register------------------------------\\

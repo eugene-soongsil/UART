@@ -10,6 +10,20 @@ IRQ시에 Status Register를 알맞게 보내는지 확인                 - O..
 CPU에서 data를 1개씩 보내 FIFO에 저장하도록 한다.
 이후 TxEn신호를 보내줘서 FIFO에 저장된 데이터들이 모두 송신되는지 확인.
 
+Register 동작 방식
+For TestBench
+
+Tx
+1. CPU의 Txdata 입력 + TxFIFO_write
+2. TxEn입력
+확인할 것 :
+Buffer, FIFO 타이밍에 맞게 들어가는지 확인.
+각종 제어신호 TxEn, TxDone 신호 제대로 나오는지 확인
+
+Rx
+1. 외부의 RXD입력 + RxSTART
+2. RxBRead로 읽어가는지 확인
+
 # What to do
 1. TxD, RxD 신호의 딜레이가 딱딱 맞지 않고있음
 2. 샘플링? or UBRR 타이밍 맞출 고민
@@ -76,6 +90,9 @@ RX : Rx -> Buffer -> FIFO -> CPU
 13. 32bit를 8bit만 사용하기
 
 14. pReadData로 모든 Register 읽을 수 있도록 수정
+
+15. Tx 정상동장 확인 했으나 Rx 정상동작X
+-> RxDone과 같은 신호들이 FIFO, Buffer 사이에서 타이밍적으로 엇갈림...
 
 @@@@@@
 펌웨어가 없는데 어떻게 Register 달고 온보딩을....?

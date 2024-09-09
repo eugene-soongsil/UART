@@ -21,7 +21,7 @@ parameter           IDLE    = 0,
                     D7      = 9,
                     STOP    = 10;
 
-reg                 r_before_IDLE;
+reg                 r_before_IDLE, r_RxDone;
 reg     [3:0]       rx_state, next_rx_state, r_rx_cnt, s_data;
 reg     [7:0]       r_data;
 
@@ -112,8 +112,15 @@ always@(posedge clk or negedge reset)begin
     //    o_rx_data <= 8'd0;
 end
 
-//RxDone -> assign ???
-assign RxDone    = (rx_state == STOP) ? 1'b1 : 1'b0;
+always@(posedge clk or negedge reset)begin
+    if(~reset)
+        r_RxDone <= 0;
+    else if(rx_state == STOP)
+        r_RxDone <= 1;
+    else
+        r_RxDone <= 0;
+end
+assign RxDone    = ((rx_state == STOP) != r_RxDone) && r_RxDone; ;
 
 //FF ? Combination?
 always@(posedge clk or negedge reset)begin
