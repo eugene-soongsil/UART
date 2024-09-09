@@ -9,7 +9,7 @@ module UART_Register_Top(
     input       [31:0]  pAddr,
     input               RxD,
     output              TxD,
-    output      [31:0]  IRQ,
+    output              IRQ,
     output      [31:0]  pReadData
 );
 

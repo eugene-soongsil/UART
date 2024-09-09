@@ -13,7 +13,7 @@ module UART_Register(
     input       [7:0]   RxData,
     output              TxStart,
     output      [7:0]   TxData,
-    output      [31:0]  IRQ,
+    output              IRQ,
     output      [31:0]  pReadData
 );
 
@@ -190,7 +190,7 @@ always@(posedge pClk or negedge pReset)begin
     end
 end
 //-------------------------end Status Register--------------------------\\
-//Read Output Logic
+//Read IRQ Output Logic
 wire   UBRR_Read, ControlReg0_Read, ControlReg1_Read, StatusReg_Read;
 
 assign UBRR_Read         = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h02);
@@ -198,14 +198,13 @@ assign ControlReg0_Read  = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h03)
 assign ControlReg1_Read  = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h04);
 assign StatusReg_Read    = pSel && pEnable && (~pWrite) && (pAddr[7:0] == 8'h05);
 
-assign pReadData =  TxBRead          ? {24'd0, TxDbuffer} :
-                    RxBRead          ? {24'd0, RxDbuffer} :
-                    UBRR_Read        ? {24'd0, UBRR} :
-                    ControlReg0_Read ? {24'd0, ControlReg0} :
-                    ControlReg1_Read ? {24'd0, ControlReg1} :
-                    StatusReg_Read   ? {24'd0, StatusReg};
+assign pReadData =  (TxBRead)          ? {24'd0, TxDbuffer} :
+                    (RxBRead)          ? {24'd0, RxDbuffer} :
+                    (UBRR_Read)        ? {24'd0, UBRR} :
+                    (ControlReg0_Read) ? {24'd0, ControlReg0} :
+                    (ControlReg1_Read) ? {24'd0, ControlReg1} :
+                    (StatusReg_Read)   ? {24'd0, StatusReg} : 32'd0;
 
-assign IRQ = (TxCIE && ControlReg0[2] || RxCIE && ControlReg0[3]) 
-            ? {24'd0, StatusReg} : 32'd0; //1bit? Condition Check
+assign IRQ = ((TxCIE || RxCIE) && CR0_en) ? 1'b1 : 1'b0;
 
 endmodule

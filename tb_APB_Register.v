@@ -3,8 +3,8 @@ module tb_APB_Register;
 reg             pClk, pReset, pSel, pEnable, pWrite;
 reg     [31:0]  pWdata, pAddr;
 reg             RxD;
-wire            TxD;
-wire    [31:0]  IRQ, pReadData;
+wire            TxD, IRQ;
+wire    [31:0]  pReadData;
 
 UART_Register_Top   top(
     .pClk(pClk),
@@ -16,6 +16,7 @@ UART_Register_Top   top(
     .pAddr(pAddr),
     .RxD(RxD),
     .TxD(TxD),
+    .IRQ(IRQ),
     .pReadData(pReadData)    
 );
 
@@ -85,6 +86,12 @@ initial begin
     #(104160*10);
     CPU_APB(1'b1, 32'd7, 32'd0); //
     #(104160*10);
+    CPU_APB(1'b1, 32'd20, 32'd0); //Tx data 10 transmit
+    #(104160*10);
+    CPU_APB(1'b1, 32'd12, 32'd0); //
+    #(104160*10);
+    CPU_APB(1'b1, 32'd18, 32'd0); //
+    #(104160*10);
     CPU_APB(1'b1, 32'h00000001, 32'd03); //Tx buffer read
     #(104160*10);
     //CPU_APB(1'b0, 32'h00000001, 32'd03); //Tx buffer read
@@ -98,6 +105,32 @@ initial begin
     #(104160*10);
     rx_in(8'd7);
     #(104160*10);
+    rx_in(8'd1);
+    #(104160*10);
+    rx_in(8'd4);
+    #(104160*10);
+    rx_in(8'd8);
+    #(104160*10);
+
+    //pReadData
+    CPU_APB(1'b0, 32'h000000000, 32'd0);
+    #50;
+    CPU_APB(1'b0, 32'h000000000, 32'd1);
+    #50;
+    CPU_APB(1'b0, 32'h000000000, 32'd2);
+    #50;
+    CPU_APB(1'b0, 32'h000000000, 32'd3);
+    #50;
+    CPU_APB(1'b0, 32'h000000000, 32'd4);
+    #50;
+    CPU_APB(1'b0, 32'h000000000, 32'd5);
+    #50;
+
+    //IRQ
+    CPU_APB(1'b1, 32'h000000004, 32'd3);
+    #50;
+    CPU_APB(1'b0, 32'h000000001, 32'd3);
+    #50;
     $finish;
 end
 
