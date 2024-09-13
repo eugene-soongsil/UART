@@ -107,13 +107,54 @@ int main() {
 	 */
 	Xil_ExceptionEnable();
 	///////////////////////////////////////////////////////////////////////
-
-	while (1) 
-	{
 	
+	unsigned int base_addr = 0x43c00000;
+
+	while (1) {
+		printf("**************\n\r");
+		printf("Select Mode:\n");
+		printf("1. TX Mode\n");
+		printf("2. RX Mode\n");
+		printf("3. RX Read\n");
+		printf("4. Exit Program\n");
+		printf("Enter your choice: ");
+		scanf("%u", &mode);
+		printf("mode:%d\n\r", mode);
+
+
+		if (mode == 1) //Tx Mode
+		{
+			unsigned int rem = 1;
+			while(rem == 1){
+				printf("Enter data to transmit : \n\r");
+				scanf("%x", &data);
+				printf("data:%d\n\r", data);
+				Xil_Out32(base_addr, data);
+				printf("More data to transmit? : 1/0(Y/N)\n\r");
+				scanf("%u", &rem);
+			}
+			Xil_Out32(base_addr + 0x3, 0x00);
+			printf("TX DONE successfully\n");
+		}
+
+		else if (mode == 2) //Rx Mode
+		{
+			unsigned int received_data;
+			{
+					Xil_Out32(base_addr + 0x3, 0x01);
+					printf("RX MODE successfully\n");
+			}
+		}
+		else if (mode == 3) //RX Read
+		{
+			unsigned int received_data;
+			{
+				received_data = Xil_In32(base_addr + 0x01);
+					printf("Received data: %08x\n", received_data);
+					printf("RX READ successfully\n");
+			}
+		}
 	}
-
-
 	cleanup_platform();
 	return 0;
 }

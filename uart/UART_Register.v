@@ -198,7 +198,7 @@ assign ControlReg0_Read  = PSEL && PENABLE && (~PWRITE) && (PADDR[7:0] == 8'h03)
 assign ControlReg1_Read  = PSEL && PENABLE && (~PWRITE) && (PADDR[7:0] == 8'h04);
 assign StatusReg_Read    = PSEL && PENABLE && (~PWRITE) && (PADDR[7:0] == 8'h05);
 
-assign PRDATA =  (TxBRead)          ? {24'd0, TxDbuffer} :
+assign PRDATA =     (TxBRead)          ? {24'd0, TxDbuffer} :
                     (RxBRead)          ? {24'd0, RxDbuffer} :
                     (UBRR_Read)        ? {24'd0, UBRR} :
                     (ControlReg0_Read) ? {24'd0, ControlReg0} :

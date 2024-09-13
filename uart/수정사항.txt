@@ -94,7 +94,16 @@ RX : Rx -> Buffer -> FIFO -> CPU
 15. Tx 정상동장 확인 했으나 Rx 정상동작X
 -> RxDone과 같은 신호들이 FIFO, Buffer 사이에서 타이밍적으로 엇갈림...
 
+16. ZYNQ에 올리는 과정에서 Rx가 데이터를 받으면 바로 PRDATA를 보내주도록 수정
+-> RxDone 신호가 올때의 IRQ를 올려서 CPU에서 받아가도록....?(이렇게하면 IRQ모드로 빠져서.....)
+-> 어떻게 해야하지? Register의 Rx단을 바꿔야할듯
+-> UART에서 Data를 받으면 바로 IRQ를 올려서 CPU에서 데이터를 가져가도록 수정한다.
+
+
 @@@@@@
 펌웨어가 없는데 어떻게 Register 달고 온보딩을....?
 내일 RxFIFO하기
 8/30 pReadData 바꾸고 testbench 작성하고 시뮬레이션 해보면 될듯
+
+!!!!!!!!! FIFO 꽉차있을때 어떻게 한다에 대해서 기술되어있지 않음 나중에 오류나면 그부분 보기! 
+
