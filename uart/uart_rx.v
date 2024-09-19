@@ -120,7 +120,7 @@ always@(posedge clk or negedge reset)begin
     else
         r_RxDone <= 0;
 end
-assign RxDone    = ((rx_state == STOP) != r_RxDone) && r_RxDone; ;
+assign RxDone    = ((rx_state == STOP) != r_RxDone) && r_RxDone;
 
 //FF ? Combination?
 always@(posedge clk or negedge reset)begin

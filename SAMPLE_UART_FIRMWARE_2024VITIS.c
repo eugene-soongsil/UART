@@ -20,7 +20,7 @@
 #include "xil_io.h"
 #include "xscugic.h"
 
-#define XPAR_FABRIC_UART_TOP_0_IRQREQ_INTR 61U
+#define UART_Register_Top_0 61U
 
 XScuGic InterruptController; /* Instance of the Interrupt Controller */
 static XScuGic_Config *GicConfig; /* The configuration parameters of the
@@ -63,14 +63,14 @@ int main() {
 
 	print("self test passed\n\r");
 
-	XScuGic_SetPriorityTriggerType(&InterruptController, XPAR_FABRIC_UART_TOP_0_IRQREQ_INTR, 0xA0, 0x3);
+	XScuGic_SetPriorityTriggerType(&InterruptController, UART_Register_Top_0, 0xA0, 0x3);
 
 	/*
 	 * Connect a device driver handler that will be called when an
 	 * interrupt for the device occurs, the device driver handler performs
 	 * the specific interrupt processing for the device
 	 */
-	Status = XScuGic_Connect(&InterruptController, XPAR_FABRIC_UART_TOP_0_IRQREQ_INTR,
+	Status = XScuGic_Connect(&InterruptController, UART_Register_Top_0,
 			(Xil_ExceptionHandler) DeviceDriverHandler,
 			(void *) &InterruptController);
 
@@ -83,7 +83,7 @@ int main() {
 	 * Enable the interrupt for the device and then cause (simulate) an
 	 * interrupt so the handlers will be called
 	 */
-	XScuGic_Enable(&InterruptController, XPAR_FABRIC_UART_TOP_0_IRQREQ_INTR);
+	XScuGic_Enable(&InterruptController, UART_Register_Top_0);
 
 	print("enabled\n\r");
 

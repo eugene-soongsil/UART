@@ -205,6 +205,6 @@ assign PRDATA =     (TxBRead)          ? {24'd0, TxDbuffer} :
                     (ControlReg1_Read) ? {24'd0, ControlReg1} :
                     (StatusReg_Read)   ? {24'd0, StatusReg} : 32'd0;
 
-assign irqreq = ((TxCIE || RxCIE) && CR0_en) ? 1'b1 : 1'b0;
+assign irqreq = (RxDone) ? 1'b1 : 1'b0;
 
 endmodule
