@@ -33,6 +33,8 @@ void DeviceDriverHandler(void *CallbackRef);
  */
 volatile int InterruptProcessed = FALSE;
 
+unsigned int RXDATA;
+
 int main() {
 	init_platform();
 	int Status;
@@ -69,7 +71,7 @@ int main() {
 	 * Connect a device driver handler that will be called when an
 	 * interrupt for the device occurs, the device driver handler performs
 	 * the specific interrupt processing for the device
-	 */
+	 */		
 	Status = XScuGic_Connect(&InterruptController, UART_Register_Top_0,
 			(Xil_ExceptionHandler) DeviceDriverHandler,
 			(void *) &InterruptController);
@@ -108,7 +110,6 @@ int main() {
 	Xil_ExceptionEnable();
 	///////////////////////////////////////////////////////////////////////
 	
-	unsigned int base_addr = 0x43c00000;
 
 	while (1) {
 		printf("**************\n\r");
@@ -145,13 +146,13 @@ int main() {
 					printf("RX MODE successfully\n");
 			}
 		}
-		else if (mode == 3) //RX Read
+
+		else if (mode == 3) // Rx to Tx Mode
 		{
 			unsigned int received_data;
 			{
-				received_data = Xil_In32(base_addr + 0x01);
-					printf("Received data: %08x\n", received_data);
-					printf("RX READ successfully\n");
+					Xil_Out32(base_addr + 0x3, 0x01);
+					printf("RX MODE successfully\n");
 			}
 		}
 	}
@@ -159,13 +160,23 @@ int main() {
 	return 0;
 }
 
-void DeviceDriverHandler(void *CallbackRef) {
-	int IntIDFull;
-	/*
-	 * Indicate the interrupt has been processed using a shared variable
-	 */
+void DeviceDriverHandler(void *CallbackRef) {	
+	unsigned int IRQ_data;
 
-	print("handler called!\n\r");
+	printf("handler called!\n\r");
+	IRQ_data = Xil_In32(base_addr + 0x05);
+
+	if(IRQ_data & 0x00000001){
+			{
+				RXDATA = Xil_In32(base_addr + 0x01);
+					printf("Received data: %08x\n", received_data);
+			}
+	}
+
+	int IntIDFull;
+
+	//Indicate the interrupt has been processed using a shared variable
+	 
 	InterruptProcessed = TRUE;
 
 	IntIDFull = XScuGic_CPUReadReg(&InterruptController,
